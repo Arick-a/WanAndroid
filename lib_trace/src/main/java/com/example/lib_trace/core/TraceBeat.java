@@ -21,14 +21,23 @@ import java.util.List;
 public class TraceBeat {
 
     public static boolean openTrace = false;
-    private static final List<Entity> methodList = new LinkedList<>();
+    private static final LinkedList<Entity> methodList = new LinkedList<>();
+
+    private static final Long MAX_DURATION_MS = 1000L;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public static void start(String name) {
         if (isOpenTraceMethod()) {
             Trace.beginSection(name);
+            Long now = System.currentTimeMillis();
             synchronized (methodList) {
-                methodList.add(new Entity(name, System.currentTimeMillis(), true, isInMainThread()));
+                methodList.add(MethodEntryPool.INSTANCE.obtain(name, now, true, isInMainThread()));
+            }
+            // 滑动窗口保持收集1000ms内的数据
+            while (!methodList.isEmpty() &&
+                    now - methodList.getFirst().time > MAX_DURATION_MS) {
+                Entity entity = methodList.removeFirst();
+                MethodEntryPool.INSTANCE.recycle(entity);
             }
         }
     }
@@ -38,7 +47,7 @@ public class TraceBeat {
         if (isOpenTraceMethod()) {
             Trace.endSection();
             synchronized (methodList) {
-                methodList.add(new Entity(name, System.currentTimeMillis(), false, isInMainThread()));
+                methodList.add(MethodEntryPool.INSTANCE.obtain(name, System.currentTimeMillis(), true, isInMainThread()));
             }
         }
     }
