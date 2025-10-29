@@ -39,12 +39,12 @@ class AnrTracer(private val reporter: LogReporter? = null) : LooperObserver {
 
     override fun dispatchBegin(beginNs: Long, first: Long) {
         val cost: Long = System.currentTimeMillis() - first
-        LogUtils.d(TAG, "dispatch begin,cost:%s,delay:%s", cost, DEFAULT_ANR - cost)
+//        LogUtils.d(TAG, "dispatch begin,cost:%s,delay:%s", cost, DEFAULT_ANR - cost)
         anrHandler.postDelayed(anrTask, DEFAULT_ANR - cost)
     }
 
     override fun dispatchEnd(beginNs: Long, endNs: Long) {
-        LogUtils.d(TAG, "dispatch end, beginNs:%s,endNs:%s,cost", beginNs, endNs, endNs - beginNs)
+//        LogUtils.d(TAG, "dispatch end, beginNs:%s,endNs:%s,cost", beginNs, endNs, endNs - beginNs)
         anrHandler.removeCallbacks(anrTask)
     }
 

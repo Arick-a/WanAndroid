@@ -7,4 +7,5 @@ android {
         }
     }
     resourcePrefix "article_"
+    namespace 'com.example.module_home'
 }

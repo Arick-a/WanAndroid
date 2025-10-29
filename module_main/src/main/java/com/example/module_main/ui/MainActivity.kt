@@ -22,7 +22,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 //import com.idlefish.flutterboost.EventListener
 //import com.idlefish.flutterboost.FlutterBoost
 //import com.idlefish.flutterboost.ListenerRemover
-import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 @Route(path = AConstance.ACTIVITY_URL_MAIN)
@@ -57,13 +56,13 @@ class MainActivity : BaseActivity() {
         viewPager.isUserInputEnabled = false
         val screenSlidePagerAdapter = ScreenSlidePagerAdapter(this)
         viewPager.adapter = screenSlidePagerAdapter
-
-        TabLayoutMediator(main_tablayout, viewPager) { tab, position ->
+        val tabLayout = findViewById<TabLayout>(R.id.main_tablayout)
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = tabList[position].tabTitle
         }.attach()
 
         for (i in 0 until screenSlidePagerAdapter.itemCount) {
-            main_tablayout.getTabAt(i)?.run {
+            tabLayout.getTabAt(i)?.run {
                 setCustomView(R.layout.main_tab_item)
                 customView!!.findViewById<ImageView>(R.id.main_iv_icon)
                     .setBackgroundResource(if (i == 0) tabList[i].tabSelectedIcon else tabList[i].tabUnSelectedIcon)
@@ -72,7 +71,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        main_tablayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(p0: TabLayout.Tab?) {
 
             }

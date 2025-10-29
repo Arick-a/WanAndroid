@@ -7,4 +7,5 @@ android {
         }
     }
     resourcePrefix "mine_"
+    namespace 'com.example.module_usercenter'
 }

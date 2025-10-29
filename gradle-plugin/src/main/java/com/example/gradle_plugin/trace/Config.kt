@@ -23,17 +23,17 @@ open class Config {
     var mIsNeedLogTraceInfo = false
 
     //在需插桩的包范围内的 无需插桩的包名
-    private val mWhitePackageMap: HashSet<String> by lazy {
+    val mWhitePackageMap: HashSet<String> by lazy {
         HashSet<String>()
     }
 
     //需插桩的包
-    private val mNeedTracePackageMap: HashSet<String> by lazy {
+    val mNeedTracePackageMap: HashSet<String> by lazy {
         HashSet<String>()
     }
 
     //在需插桩的包范围内的 无需插桩的白名单
-    private val mWhiteClassMap: HashSet<String> by lazy {
+    val mWhiteClassMap: HashSet<String> by lazy {
         HashSet<String>()
     }
 

@@ -7,7 +7,6 @@ import com.example.module_home.R
 import com.example.module_home.databinding.FragmentCompositeBinding
 import com.example.module_home.home.ArticleViewModel
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.android.synthetic.main.fragment_composite.*
 
 /**
  * 综合
@@ -23,9 +22,9 @@ class CompositeFragment : BaseMvvmFragment<FragmentCompositeBinding, ArticleView
         super.addObserver()
         viewModel.treeData.observe(this, {
 
-            pager.offscreenPageLimit = it.size
+            viewDataBinding.pager.offscreenPageLimit = it.size
 
-            pager.adapter = object :
+            viewDataBinding.pager.adapter = object :
                 FragmentStateAdapter(requireActivity().supportFragmentManager, lifecycle) {
                 override fun getItemCount(): Int = it.size
 
@@ -33,7 +32,7 @@ class CompositeFragment : BaseMvvmFragment<FragmentCompositeBinding, ArticleView
                     CompositePageFragment.newInstance(it[position].id)
             }
 
-            TabLayoutMediator(tab_layout, pager) { tab, position ->
+            TabLayoutMediator(viewDataBinding.tabLayout, viewDataBinding.pager) { tab, position ->
                 tab.text = it[position].name
             }.attach()
 

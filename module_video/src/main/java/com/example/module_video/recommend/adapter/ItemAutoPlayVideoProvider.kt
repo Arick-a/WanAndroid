@@ -29,24 +29,24 @@ class ItemAutoPlayVideoProvider : BaseItemProvider<OpenRecBean>() {
     override val layoutId: Int
         get() = R.layout.rec_item_auto_play
 
-    override fun convert(holder: BaseViewHolder, item: OpenRecBean) {
-        holder.setText(R.id.tv_title, item.data.detail.title)
-        holder.setText(R.id.tv_description, item.data.detail.description)
+    override fun convert(helper: BaseViewHolder, item: OpenRecBean) {
+        helper.setText(R.id.tv_title, item.data.detail.title)
+        helper.setText(R.id.tv_description, item.data.detail.description)
 
-        GlideApp.with(holder.itemView)
+        GlideApp.with(helper.itemView)
             .load(item.data.detail.icon)
             .progress(context)
             .apply(RequestOptions.bitmapTransform(CircleCrop()))
-            .into(ProgressImageViewTarget(item.data.detail.icon, holder.getView(R.id.iv_author)))
+            .into(ProgressImageViewTarget(item.data.detail.icon, helper.getView(R.id.iv_author)))
 
-        GlideApp.with(holder.itemView)
+        GlideApp.with(helper.itemView)
             .load(item.data.detail.imageUrl)
             .progress(context)
             .transform(GlideRoundTransform(context))
             .into(
                 ProgressImageViewTarget(
                     item.data.detail.imageUrl,
-                    holder.getView(R.id.iv_video_cover)
+                    helper.getView(R.id.iv_video_cover)
                 )
             )
     }

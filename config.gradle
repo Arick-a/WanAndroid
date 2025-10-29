@@ -1,10 +1,10 @@
 ext {
     android = [
             applicationId    : "com.example.android_kt_wandroid",
-            compileSdkVersion: 29,
             buildToolsVersion: "28.0.3",
             minSdkVersion    : 21,
-            targetSdkVersion : 29,
+            targetSdkVersion : 34,
+            compileSdkVersion: 34,
             versionCode      : 1,
             versionName      : "1.4"
     ]

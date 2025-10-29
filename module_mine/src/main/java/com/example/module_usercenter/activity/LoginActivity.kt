@@ -8,14 +8,15 @@ import android.text.method.PasswordTransformationMethod
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
 import com.example.common_base.base.mvp.BaseMVPActivity
 import com.example.common_base.constants.AConstance
-import com.example.common_base.constants.AConstance.ACTIVITY_URL_MAIN
-import com.example.common_base.constants.AConstance.ACTIVITY_URL_REGISTER
-import com.example.common_base.constants.FlutterConstance
-import com.example.common_base.util.CookieHelper
 import com.example.common_base.util.StatusBarUtil
 import com.example.common_base.util.ToastUtil
 import com.example.common_base.util.UserHelper
@@ -24,30 +25,39 @@ import com.example.module_usercenter.bean.LoginResult
 import com.example.module_usercenter.contract.LoginContract
 import com.example.module_usercenter.event.LoginEvent
 import com.example.module_usercenter.presenter.LoginPresenter
-//import com.idlefish.flutterboost.FlutterBoost
-import kotlinx.android.synthetic.main.mine_activity_login.*
 import org.greenrobot.eventbus.EventBus
 
 @Route(path = AConstance.ACTIVITY_URL_LOGIN)
 class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View, View.OnClickListener {
 
+    // 声明所有需要的视图变量，使用 lateinit var 延迟初始化
+    private lateinit var ivClose: ImageView
+    private lateinit var etLoginUsername: EditText
+    private lateinit var etLoginPassword: EditText
+    private lateinit var cbLoginPwdVisible: CheckBox
+    private lateinit var tvRegister: TextView
+    private lateinit var btnLogin: Button
+
     override fun onClick(v: View?) {
         when (v) {
-            btn_login -> {
+            // 使用声明的变量
+            btnLogin -> {
                 login()
             }
-            tv_register -> ARouter.getInstance().build(ACTIVITY_URL_REGISTER).navigation()
+            // 使用声明的变量
+            tvRegister -> ARouter.getInstance().build(AConstance.ACTIVITY_URL_REGISTER).navigation()
 
             else -> print("none of the above")
         }
     }
 
     override fun loginSuccess(loginResult: LoginResult) {
+        // 使用声明的变量
         UserHelper.saveUserNamePwd(
-            et_login_username.text.trim().toString(),
-            et_login_password.text.trim().toString()
+            etLoginUsername.text.trim().toString(),
+            etLoginPassword.text.trim().toString()
         )
-        ARouter.getInstance().build(ACTIVITY_URL_MAIN).navigation()
+        ARouter.getInstance().build(AConstance.ACTIVITY_URL_MAIN).navigation()
         EventBus.getDefault().post(LoginEvent())
 //        FlutterBoost.instance().sendEventToFlutter(FlutterConstance.TO_FLUTTER_EVENT_COOKIE, CookieHelper.getDefCookieMap())
         finish()
@@ -59,45 +69,60 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View, Vie
 
     override fun initView() {
         StatusBarUtil.setLightMode(this)
-        iv_close.setOnClickListener { finish() }
+
+        // --- 1. 使用 findViewById 初始化所有视图变量 ---
+        ivClose = findViewById(R.id.iv_close)
+        etLoginUsername = findViewById(R.id.et_login_username)
+        etLoginPassword = findViewById(R.id.et_login_password)
+        cbLoginPwdVisible = findViewById(R.id.cb_login_pwd_visible)
+        tvRegister = findViewById(R.id.tv_register)
+        btnLogin = findViewById(R.id.btn_login)
+        // ---------------------------------------------
+
+        // 使用声明的变量
+        ivClose.setOnClickListener { finish() }
     }
 
     override fun initData() {
         super.initData()
+
         //设置下划线
-        tv_register.paint.flags = Paint.UNDERLINE_TEXT_FLAG
-        //拿取以登录过的账号密码显示
+        tvRegister.paint.flags = Paint.UNDERLINE_TEXT_FLAG
+
+        //拿取已登录过的账号密码显示
         val userName = UserHelper.getUserName()
         val passWord = UserHelper.getUserPwd()
 
-        et_login_username.setText(userName)
-        et_login_username.setSelection(userName.length)
-        et_login_password.setText(passWord)
-        et_login_password.setSelection(passWord.length)
+        etLoginUsername.setText(userName)
+        etLoginUsername.setSelection(userName.length)
+        etLoginPassword.setText(passWord)
+        etLoginPassword.setSelection(passWord.length)
 
-        btn_login.setOnClickListener(this)
-        tv_register.setOnClickListener(this)
+        // 设置点击监听
+        btnLogin.setOnClickListener(this)
+        tvRegister.setOnClickListener(this)
 
         //密码框右侧的密码可见不可见按钮
-        cb_login_pwd_visible.setOnCheckedChangeListener { _, isChecked ->
+        cbLoginPwdVisible.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                //可以隐藏/显示文本
-                et_login_password.transformationMethod =
+                //使用声明的变量
+                etLoginPassword.transformationMethod =
                     HideReturnsTransformationMethod.getInstance()
                 //设置光标在文字末尾
-                et_login_password.setSelection(et_login_password.text.toString().length)
+                etLoginPassword.setSelection(etLoginPassword.text.toString().length)
             } else {
-                et_login_password.transformationMethod = PasswordTransformationMethod.getInstance()
-                et_login_password.setSelection(et_login_password.text.toString().length)
+                etLoginPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+                etLoginPassword.setSelection(etLoginPassword.text.toString().length)
             }
         }
 
-        et_login_password.setOnEditorActionListener { _, actionId, _ ->
+        etLoginPassword.setOnEditorActionListener { _, actionId, _ ->
             //监听完成按钮 关闭软键盘 并且开始登录
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                // 使用声明的变量
                 val imm =
-                    et_login_password.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(et_login_password.windowToken, 0)
+                    etLoginPassword.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(etLoginPassword.windowToken, 0)
                 login()
                 true
             }
@@ -106,8 +131,10 @@ class LoginActivity : BaseMVPActivity<LoginPresenter>(), LoginContract.View, Vie
     }
 
     private fun login() {
-        val phone = et_login_username.text.trim().toString()
-        val pwd = et_login_password.text.trim().toString()
+        // 使用声明的变量
+        val phone = etLoginUsername.text.trim().toString()
+        val pwd = etLoginPassword.text.trim().toString()
+
         if (TextUtils.isEmpty(phone)) {
             ToastUtil.showShortToast(this, getString(R.string.please_input_username))
             return

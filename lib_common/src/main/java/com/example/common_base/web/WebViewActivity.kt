@@ -3,15 +3,14 @@ package com.example.common_base.web
 import android.app.Activity
 import android.content.Intent
 import android.view.Menu
-import android.view.MenuItem
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.LinearLayout
+import androidx.appcompat.widget.Toolbar
 import com.example.common_base.R
 import com.example.common_base.base.BaseActivity
 import com.example.common_base.util.StatusBarUtil
 import com.example.common_base.util.dp
-import kotlinx.android.synthetic.main.activity_web_view.*
 
 const val URL = "url"
 
@@ -36,7 +35,7 @@ class WebViewActivity : BaseActivity() {
     override fun initView() {
         StatusBarUtil.setTranslucent(this,0)
         StatusBarUtil.setLightMode(this)
-
+        val toolbar:Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.title = ""
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -56,7 +55,7 @@ class WebViewActivity : BaseActivity() {
         })
         webView.addLifecycleObserver(this)
 
-        fl_content.addView(webView)
+        findViewById<ViewGroup>(R.id.fl_content).addView(webView)
     }
 
     fun onBack() {

@@ -46,12 +46,12 @@ class DashboardView(context: Context?, attrs: AttributeSet?) : View(context, att
             PathDashPathEffect(mDash, (pathMeasure.length- DASH_LENGTH) / 20f, 0f, PathDashPathEffect.Style.ROTATE)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas?.drawPath(mPath, mPaint)
+        canvas.drawPath(mPath, mPaint)
 
         mPaint.pathEffect = pathEffect
-        canvas?.drawPath(mPath, mPaint)
+        canvas.drawPath(mPath, mPaint)
         mPaint.pathEffect = null
 
     }

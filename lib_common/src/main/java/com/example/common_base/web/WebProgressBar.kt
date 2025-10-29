@@ -36,9 +36,9 @@ class WebProgressBar : View {
         return progress
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         paint.strokeWidth = mHeight.toFloat()
-        canvas?.drawLine(0f, 0f, width * progress / 100f, 0f, paint)
+        canvas.drawLine(0f, 0f, width * progress / 100f, 0f, paint)
     }
 }
