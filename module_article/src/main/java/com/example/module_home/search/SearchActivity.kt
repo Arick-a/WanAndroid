@@ -12,7 +12,6 @@ import com.example.module_home.ArticleViewModelFactory
 import com.example.module_home.BR
 import com.example.module_home.R
 import com.example.module_home.databinding.ArticleActivitySearchBinding
-import kotlinx.android.synthetic.main.article_activity_search.*
 
 /**
  * 搜索文章页
@@ -23,7 +22,7 @@ class SearchActivity : BaseMvvmActivity<ArticleActivitySearchBinding, SearchView
         StatusBarUtil.setLightMode(this)
         viewDataBinding?.tvCancle?.setOnClickListener { finish() }
 
-        search_input.apply {
+        viewDataBinding!!.searchInput.apply {
 
             setIconifiedByDefault(false)
             queryHint = getString(R.string.str_input_key)
@@ -55,10 +54,10 @@ class SearchActivity : BaseMvvmActivity<ArticleActivitySearchBinding, SearchView
 
     fun search(msg: String?, submit: Boolean = false) {
         selectFragment(1)
-        search_input.clearFocus()
+        viewDataBinding!!.searchInput.clearFocus()
         viewModel.searchKey.value = msg
         if (submit) {
-            search_input.setQuery(msg, false)
+            viewDataBinding!!.searchInput.setQuery(msg, false)
         }
     }
 
@@ -104,7 +103,7 @@ class SearchActivity : BaseMvvmActivity<ArticleActivitySearchBinding, SearchView
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (!fragments[0].isVisible) {
-                search_input.setQuery("", false)
+                viewDataBinding!!.searchInput.setQuery("", false)
                 selectFragment(0)
                 return true
             }

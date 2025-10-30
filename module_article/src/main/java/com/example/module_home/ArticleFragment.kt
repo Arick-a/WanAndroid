@@ -25,8 +25,6 @@ import com.example.module_home.home.bean.BannerBean
 import com.example.module_home.search.SearchActivity
 import com.google.android.material.tabs.TabLayoutMediator
 import com.youth.banner.indicator.RectangleIndicator
-import kotlinx.android.synthetic.main.article_fragment_home.pager
-import kotlinx.android.synthetic.main.article_fragment_home.tab_layout
 
 /**
  * Home页
@@ -49,14 +47,14 @@ class ArticleFragment : BaseMvvmFragment<ArticleFragmentHomeBinding, ArticleView
 
         Log.d("99788", "GC使用的总耗时:$runtimeStat /阻塞式GC的总耗时:$runtimeStat1")
 
-        pager.adapter = object :
+        viewDataBinding.pager.adapter = object :
             FragmentStateAdapter(requireActivity().supportFragmentManager, lifecycle) {
             override fun getItemCount(): Int = fragments.size
 
             override fun createFragment(position: Int) = fragments[position]
         }
 
-        TabLayoutMediator(tab_layout, pager) { tab, position ->
+        TabLayoutMediator(viewDataBinding.tabLayout, viewDataBinding.pager) { tab, position ->
             tab.text = titles[position]
         }.attach()
 

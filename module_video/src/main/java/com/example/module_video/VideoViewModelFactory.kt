@@ -13,7 +13,7 @@ import com.example.module_video.videoDetail.VideoPlayViewModel
  */
 class VideoViewModelFactory : ViewModelProvider.Factory {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>) = with(modelClass) {
+    override fun <T : ViewModel> create(modelClass: Class<T>) = with(modelClass) {
         when {
             isAssignableFrom(OpenEyeViewModel::class.java) ->
                 OpenEyeViewModel(DefOpenEyeRepository())

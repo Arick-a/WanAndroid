@@ -1,74 +1,47 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
-    }
-}
 plugins {
-    id("kotlin")
-    id("org.jetbrains.kotlin.jvm")
+    id 'java'
+    id 'groovy'
+    id 'kotlin'
+    id 'maven-publish'
 }
-apply plugin: 'groovy'
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: "com.gradle.plugin-publish"
+
 
 dependencies {
+
+    //gradle sdk
     implementation gradleApi()
+    //groovy sdk
     implementation localGroovy()
-
-    implementation group: 'org.ow2.asm', name: 'asm', version: '7.0'
-    implementation group: 'org.ow2.asm', name: 'asm-commons', version: '7.0'
-    implementation 'com.android.tools.build:gradle:4.1.2'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.6.20"
+    implementation 'com.android.tools.build:gradle:8.1.0'
+    implementation 'com.android.tools.build:gradle-api:8.1.0'
+    implementation 'org.ow2.asm:asm:9.1'
+    implementation 'org.ow2.asm:asm-util:9.1'
+    implementation 'org.ow2.asm:asm-commons:9.1'
 }
 
-repositories {
-    mavenCentral()
-}
+version = "1.0.2"
+group = "com.example.gradle_plugin"
 
+publishing {
+    repositories { RepositoryHandler handler ->
+        handler.maven { MavenArtifactRepository mavenArtifactRepository -> //正式仓库
+            url uri('../repos')
+            allowInsecureProtocol = true
+            if (url.toString().startsWith("http")) {
+                credentials {
+                    username = ''
+                    password = ''
+                }
+            }
+        }
+    }
 
-compileGroovy {
-    dependsOn tasks.getByPath('compileKotlin')
-    classpath += files(compileKotlin.destinationDir)
-}
-
-version = "1.0.2"    //配置插件的版本号
-group = "com.example.traceMethodPlugin"   //插件的群组，插件的classpath会用到
-
-pluginBundle {
-
-    website = 'http://www.gradle.org/'
-    vcsUrl = 'https://github.com/gradle/gradle'
-    description = 'trace plugin'  //插件描述
-    tags = ['trace', 'plugin']  //插件的tag。可以通过这个在插件门户上搜索
-
-    plugins {
-        greetingsPlugin {
-            id = 'com.example.trace-method-plugin'   //插件的id，到时候apply的插件id
-            displayName = 'Trace plugin'
+    publications { PublicationContainer publication ->
+        maven(MavenPublication) {
+            version version
+            artifactId 'TracePlugin'
+            groupId group
+            from components.java
         }
     }
 }
-
-/**
- * 上传到本地Maven
- */
-uploadArchives {
-    repositories.mavenDeployer {
-        repository(url: uri('../repos'))
-        pom.groupId = 'com.example.gradle_plugin'
-        pom.artifactId = 'TracePlugin'
-        pom.version = "1.0.2"
-    }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-

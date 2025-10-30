@@ -8,6 +8,7 @@ android {
         }
     }
     resourcePrefix "video_"
+    namespace 'com.example.module_video'
 }
 
 dependencies {

@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'trace-method-plugin'
 
@@ -35,7 +35,7 @@ android {
             renderscriptSupportModeEnabled true
 
             ndk {
-                abiFilters  'armeabi-v7a'
+                abiFilters  'armeabi-v7a', 'x86_64'
             }
 
             kapt {
@@ -58,9 +58,10 @@ android {
         enabled true
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
+    namespace 'com.example.android_kt_wandroid'
     android.applicationVariants.all { variant ->
         variant.outputs.all {
             outputFileName = "android_${getGitBranch()}_${getGitRevision()}.apk"

@@ -13,7 +13,6 @@ import com.example.module_home.search.adapter.HotKeyAdapter
 import com.example.module_home.search.adapter.SearchHistoryAdapter
 import com.example.module_home.search.bean.HotKeyBean
 import com.google.android.flexbox.FlexboxLayoutManager
-import kotlinx.android.synthetic.main.fragment_hot_key.*
 
 /**
  * 热词、历史查询
@@ -27,8 +26,7 @@ class HotKeyFragment : BaseMvvmFragment<FragmentHotKeyBinding, SearchViewModel>(
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        iv_clear_history.setOnClickListener {
+        viewDataBinding.ivClearHistory.setOnClickListener {
             val builder = AlertDialog.Builder(activity)
             builder.setMessage("确定要清空记录吗")
                 .setPositiveButton("确定") { _, _ ->
@@ -42,8 +40,7 @@ class HotKeyFragment : BaseMvvmFragment<FragmentHotKeyBinding, SearchViewModel>(
 
         mAdapter = HotKeyAdapter(R.layout.item_hot_key)
         mHisAdapter = SearchHistoryAdapter(R.layout.item_search_history)
-
-        rv_hot.apply {
+        viewDataBinding.rvHot.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
             adapter = mAdapter
         }
@@ -51,8 +48,7 @@ class HotKeyFragment : BaseMvvmFragment<FragmentHotKeyBinding, SearchViewModel>(
         mAdapter.setOnItemClickListener { adapter, _, position ->
             (activity as SearchActivity).search(msg = (adapter.data[position] as HotKeyBean).name,submit = true)
         }
-
-        rv_history.apply {
+        viewDataBinding.rvHistory.apply {
             val flexboxLayoutManager = FlexboxLayoutManager(requireContext())
             layoutManager = flexboxLayoutManager
             adapter = mHisAdapter
@@ -61,24 +57,24 @@ class HotKeyFragment : BaseMvvmFragment<FragmentHotKeyBinding, SearchViewModel>(
 
     override fun addObserver() {
         //热门
-        viewModel.hotKeyData.observe(viewLifecycleOwner, Observer {
+        viewModel.hotKeyData.observe(viewLifecycleOwner) {
             mAdapter.setList(it)
 
-            if(it.isNotEmpty()){
-                tv_hot_key.visibility = View.VISIBLE
-            }else{
-                tv_hot_key.visibility = View.GONE
+            if (it.isNotEmpty()) {
+                viewDataBinding.tvHotKey.visibility = View.VISIBLE
+            } else {
+                viewDataBinding.tvHotKey.visibility = View.GONE
             }
-        })
+        }
         //历史
-        viewModel.historyData.observe(viewLifecycleOwner, Observer {
-            if(it.isNotEmpty()){
-                iv_clear_history.visibility = View.VISIBLE
-            }else{
-                iv_clear_history.visibility = View.GONE
+        viewModel.historyData.observe(viewLifecycleOwner) {
+            if (it.isNotEmpty()) {
+                viewDataBinding.ivClearHistory.visibility = View.VISIBLE
+            } else {
+                viewDataBinding.ivClearHistory.visibility = View.GONE
             }
             mHisAdapter.setList(it)
-        })
+        }
     }
 
     companion object {

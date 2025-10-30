@@ -15,7 +15,6 @@ import com.example.module_home.R
 import com.example.module_home.composite.bean.Project
 import com.example.module_home.databinding.FragmentCompositePageBinding
 import com.example.module_home.home.ArticleViewModel
-import kotlinx.android.synthetic.main.fragment_composite_page.*
 
 private const val CID = "cid"
 
@@ -34,7 +33,7 @@ class CompositePageFragment : BaseMvvmFragment<FragmentCompositePageBinding, Art
     }
 
     override fun initData() {
-        srl_composite.autoRefresh()
+        viewDataBinding.srlComposite.autoRefresh()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,7 +43,7 @@ class CompositePageFragment : BaseMvvmFragment<FragmentCompositePageBinding, Art
     }
 
     private fun initRefresh() {
-        srl_composite.apply {
+        viewDataBinding.srlComposite.apply {
             setOnRefreshListener {
                 mCurPage = 1
                 viewModel.getTreeNode(mCurPage, cid)
@@ -59,7 +58,7 @@ class CompositePageFragment : BaseMvvmFragment<FragmentCompositePageBinding, Art
 
     private fun initRecycler() {
         mAdapter = CompositeAdapter(R.layout.article_rv_item_composite)
-        rv_page.apply {
+        viewDataBinding.rvPage.apply {
             layoutManager = StaggeredGridLayoutManager(2, RecyclerView.VERTICAL)
             adapter = mAdapter
         }
@@ -71,32 +70,35 @@ class CompositePageFragment : BaseMvvmFragment<FragmentCompositePageBinding, Art
 
     override fun addObserver() {
         super.addObserver()
-        viewModel.treeNodeData.observe(this, Observer {
+        viewModel.treeNodeData.observe(this) {
             if (mCurPage == 1) {
                 mAdapter.setList(it)
             } else {
                 mAdapter.addData(it)
             }
-        })
-        viewModel.mStateLiveData.observe(this, Observer {
+        }
+        viewModel.mStateLiveData.observe(this) {
             when (it) {
                 is SuccessState -> {
                     mCurPage += 1
-                    srl_composite.finishRefresh()
-                    srl_composite.finishLoadMore()
+                    viewDataBinding.srlComposite.finishRefresh()
+                    viewDataBinding.srlComposite.finishLoadMore()
                 }
+
                 is ErrorState -> {
                     mCurPage = 0
-                    srl_composite.finishRefresh(false)
-                    srl_composite.finishLoadMore(false)
+                    viewDataBinding.srlComposite.finishRefresh(false)
+                    viewDataBinding.srlComposite.finishLoadMore(false)
                 }
+
                 is CompleteState -> {
-                    srl_composite.finishRefreshWithNoMoreData()
+                    viewDataBinding.srlComposite.finishRefreshWithNoMoreData()
                 }
+
                 else -> {
                 }
             }
-        })
+        }
     }
 
     companion object {

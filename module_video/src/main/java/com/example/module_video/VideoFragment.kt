@@ -11,7 +11,6 @@ import com.example.common_base.constants.AConstance
 import com.example.module_video.databinding.FragmentVideoBinding
 import com.example.module_video.recommend.RecommendFragment
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.android.synthetic.main.fragment_video.*
 
 /**
  *  @author : zhang.wenqiang
@@ -42,7 +41,7 @@ class VideoFragment : BaseMvvmFragment<FragmentVideoBinding, BaseViewModel>() {
             override fun createFragment(position: Int) = fragments[position]
         }
 
-        TabLayoutMediator(tab_layout, pager) { tab, position ->
+        TabLayoutMediator(viewDataBinding.tabLayout, viewDataBinding.pager) { tab, position ->
             tab.text = titles[position]
         }.attach()
     }

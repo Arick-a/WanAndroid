@@ -132,9 +132,9 @@ class LoadingView @JvmOverloads constructor(
         )
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas?.drawArc(mRectf!!, startAngle, sweepAngle, false, mPaint!!)
+        canvas.drawArc(mRectf!!, startAngle, sweepAngle, false, mPaint!!)
     }
 
     override fun onAttachedToWindow() {

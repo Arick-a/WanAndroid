@@ -20,7 +20,7 @@ class TextViewDemo(context: Context?, attrs: AttributeSet?) : View(context, attr
     private val bounds = Rect()
     private val fontMetrics = Paint.FontMetrics()
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         mPaint.color = Color.BLACK
         mPaint.textAlign = Paint.Align.CENTER

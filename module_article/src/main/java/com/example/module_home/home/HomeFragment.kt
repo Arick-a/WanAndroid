@@ -26,7 +26,6 @@ import com.example.module_home.home.adapter.RecommendAdapter
 import com.example.module_home.home.bean.Article
 //import com.idlefish.flutterboost.FlutterBoost
 //import com.idlefish.flutterboost.ListenerRemover
-import kotlinx.android.synthetic.main.fragment_first_page.*
 
 /**
  * 文章model首页
@@ -66,7 +65,7 @@ class HomeFragment : BaseMvvmFragment<FragmentFirstPageBinding, ArticleViewModel
     }
 
     private fun initRefresh() {
-        srl_refresh.apply {
+        viewDataBinding.srlRefresh.apply {
             setOnRefreshListener { viewModel.getArticles(isRefresh = true) }
             setOnLoadMoreListener { viewModel.getArticles() }
             setEnableLoadMore(true)
@@ -98,8 +97,7 @@ class HomeFragment : BaseMvvmFragment<FragmentFirstPageBinding, ArticleViewModel
                 WebViewActivity.launch(requireActivity(), (adapter.data[position] as Article).link)
             }
         }
-
-        rv_content.apply {
+        viewDataBinding.rvContent.apply {
             addItemDecoration(
                 LinearItemDecoration(requireContext()).color(
                     ContextCompat.getColor(requireContext(), R.color.gray_ea)
@@ -121,12 +119,12 @@ class HomeFragment : BaseMvvmFragment<FragmentFirstPageBinding, ArticleViewModel
         viewModel.mStateLiveData.observe(viewLifecycleOwner) {
             when (it) {
                 is SuccessState -> {
-                    srl_refresh.finishRefresh()
-                    srl_refresh.finishLoadMore()
+                    viewDataBinding.srlRefresh.finishRefresh()
+                    viewDataBinding.srlRefresh.finishLoadMore()
                 }
                 is ErrorState -> {
-                    srl_refresh.finishRefresh(false)
-                    srl_refresh.finishLoadMore(false)
+                    viewDataBinding.srlRefresh.finishRefresh(false)
+                    viewDataBinding.srlRefresh.finishLoadMore(false)
                     ToastUtil.showShortToast(requireContext(), it.message)
                 }
                 else -> {

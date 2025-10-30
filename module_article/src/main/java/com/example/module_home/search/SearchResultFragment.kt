@@ -14,7 +14,6 @@ import com.example.module_home.R
 import com.example.module_home.databinding.FragmentSearchResultBinding
 import com.example.module_home.search.adapter.SearchResultAdapter
 import com.example.module_home.search.bean.SearchResult
-import kotlinx.android.synthetic.main.fragment_search_result.*
 
 /**
  * 搜索结果页
@@ -27,15 +26,15 @@ class SearchResultFragment : BaseMvvmFragment<FragmentSearchResultBinding, Searc
 
     override fun initView(view: View?) {
         mAdapter = SearchResultAdapter(R.layout.item_home_recycler)
-
-        srl_refresh.apply {
+        
+        viewDataBinding.srlRefresh.apply {
             setOnRefreshListener { viewModel.searchByKey(viewModel.searchKey.value!!, true) }
             setOnLoadMoreListener { viewModel.searchByKey(viewModel.searchKey.value!!) }
             setEnableLoadMore(true)
             setEnableRefresh(true)
         }
 
-        rv_search.apply {
+        viewDataBinding.rvSearch.apply {
             addItemDecoration(
                 LinearItemDecoration(requireContext()).color(
                     ContextCompat.getColor(requireContext(), R.color.gray_ea)
@@ -54,7 +53,7 @@ class SearchResultFragment : BaseMvvmFragment<FragmentSearchResultBinding, Searc
 
     override fun addObserver() {
         viewModel.searchKey.observe(viewLifecycleOwner, Observer {
-            srl_refresh.autoRefresh()
+            viewDataBinding.srlRefresh.autoRefresh()
         })
 
         viewModel.searchData.observe(viewLifecycleOwner, Observer {
@@ -64,12 +63,12 @@ class SearchResultFragment : BaseMvvmFragment<FragmentSearchResultBinding, Searc
         viewModel.mStateLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is SuccessState -> {
-                    srl_refresh.finishRefresh()
-                    srl_refresh.finishLoadMore()
+                    viewDataBinding.srlRefresh.finishRefresh()
+                    viewDataBinding.srlRefresh.finishLoadMore()
                 }
                 is ErrorState -> {
-                    srl_refresh.finishRefresh(false)
-                    srl_refresh.finishLoadMore(false)
+                    viewDataBinding.srlRefresh.finishRefresh(false)
+                    viewDataBinding.srlRefresh.finishLoadMore(false)
                 }
                 else -> {
                 }

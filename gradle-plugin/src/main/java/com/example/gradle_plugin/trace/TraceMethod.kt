@@ -52,9 +52,9 @@ class TraceMethod {
         return accessFlag and Opcodes.ACC_NATIVE != 0
     }
 
-    override fun equals(obj: Any?): Boolean {
-        return if (obj is TraceMethod) {
-            val tm = obj as TraceMethod?
+    override fun equals(other: Any?): Boolean {
+        return if (other is TraceMethod) {
+            val tm = other as TraceMethod?
             tm!!.getMethodNameText() == getMethodNameText()
         } else {
             false

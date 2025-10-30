@@ -15,7 +15,7 @@ import com.example.module_home.search.SearchViewModel
  */
 class ArticleViewModelFactory : ViewModelProvider.Factory {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>) = with(modelClass) {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = with(modelClass) {
         when {
             isAssignableFrom(ArticleViewModel::class.java) ->
                 ArticleViewModel(RemoteDataSource())

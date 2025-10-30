@@ -12,7 +12,7 @@ import com.example.module_usercenter.api.MineRepository
  */
 class MineViewModelFactory : ViewModelProvider.Factory {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>) = with(modelClass) {
+    override fun <T : ViewModel> create(modelClass: Class<T>) = with(modelClass) {
         when {
             isAssignableFrom(MineViewModel::class.java) ->
                 MineViewModel(DefMineRepository())
