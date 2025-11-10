@@ -16,11 +16,11 @@ class SplashActivity : BaseActivity() {
     override fun getLayoutResId(): Int = R.layout.activity_splash
 
     override fun initView() {
-        if (Random.nextBoolean()) {
-            playAnimation()
-        } else {
+//        if (Random.nextBoolean()) {
+//            playAnimation()
+//        } else {
             toMainPage()
-        }
+//        }
     }
 
     private fun playAnimation() {
