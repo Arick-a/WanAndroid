@@ -1,12 +1,11 @@
 package com.example.module_usercenter.activity
 
 import android.annotation.SuppressLint
-import android.graphics.Rect
+import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alibaba.android.arouter.facade.annotation.Route
@@ -15,9 +14,7 @@ import com.example.common_base.constants.AConstance
 import com.example.common_base.util.StatusBarUtil
 import com.example.module_usercenter.R
 import com.example.module_usercenter.adapter.CommentAdapter
-import com.example.module_usercenter.widget.HandleControlledBottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.youth.banner.util.BannerUtils.dp2px
 import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.cos
@@ -44,20 +41,33 @@ class TestActivity : BaseActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         btnConfirm = findViewById(R.id.btn_confirm)
 
+        val screenHeight = resources.displayMetrics.heightPixels
+        val expandedOffsetHeight = (screenHeight * 0.15).toInt()
         // 初始化BottomSheet
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet).apply {
-            peekHeight = 500 // 默认展示两条
+            expandedOffset = expandedOffsetHeight
+            peekHeight = (screenHeight * 0.2).toInt()
             isHideable = false
         }
-
         // 监听 BottomSheet 拖动状态
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {}
+        bottomSheetBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                val state = bottomSheetBehavior.state
+                val paddingBottom = when (state) {
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> (screenHeight * 0.5).toInt()
+                    BottomSheetBehavior.STATE_COLLAPSED -> (screenHeight * 0.8).toInt() + btnConfirm.height
+                    BottomSheetBehavior.STATE_EXPANDED -> (screenHeight * 0.2).toInt() + btnConfirm.height
+                    else -> (bottomSheet.bottom - bottomSheet.top - recyclerView.height)
+                }
+                recyclerView.setPadding(0, 0, 0, paddingBottom)
+                recyclerView.clipToPadding = false
+            }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                // slideOffset: -1(隐藏) ~ 0(收起) ~ 1(展开)
                 val translationY = slideOffset.coerceIn(0f, 1f)
                 btnConfirm.translationY = translationY * btnConfirm.height
+                recyclerView.setPadding(0, 0, 0, (translationY * btnConfirm.height).toInt())
             }
         })
 
@@ -85,6 +95,12 @@ class TestActivity : BaseActivity() {
         }
         findViewById<Button>(R.id.btn_3).setOnClickListener {
             funD(1000)
+        }
+        findViewById<Button>(R.id.btn_4).setOnClickListener {
+            startActivity(Intent(this, TimeLineActivity::class.java))
+        }
+        findViewById<Button>(R.id.btn_5).setOnClickListener {
+            startActivity(Intent(this, ThreeStageSheetActivity::class.java))
         }
     }
 

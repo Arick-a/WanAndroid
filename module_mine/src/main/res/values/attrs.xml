@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <declare-styleable name="BottomSheetBehavior_Layout" tools:ignore="ResourceName">
+        <attr name="behavior_peekHeight" format="dimension" />
+        <attr name="behavior_hideAble" format="boolean" />
+        <attr name="behavior_fitToContents" format="boolean" />
+        <attr name="behavior_skipCollapse" format="boolean" />
+        <attr name="behavior_middleHeight" format="dimension" />
+    </declare-styleable>
+</resources>
