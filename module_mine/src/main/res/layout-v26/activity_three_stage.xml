@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFF"
-    android:paddingTop="@dimen/dp_35"
+    android:paddingTop="@dimen/dp_30"
     tools:ignore="ResourceName">
 
     <com.example.module_usercenter.widget.AppointmentBoardView
