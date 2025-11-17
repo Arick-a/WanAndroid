@@ -11,6 +11,7 @@ WanAndroid是一个融合了各种技术的App,主要是为了将平时学习的
 ![video](https://github.com/ZhangWenqiangx/WanAndroid/blob/dev/screenshots/1660284863889.gif)
 ![video list](https://github.com/ZhangWenqiangx/WanAndroid/blob/dev/screenshots/1660284879592.gif)
 ![article](https://github.com/ZhangWenqiangx/WanAndroid/blob/dev/screenshots/1660284897425.gif)
+![appointment](https://github.com/ZhangWenqiangx/WanAndroid/blob/dev/screenshots/appointment.gif)
 
 ## 主要功能
 - [**玩 Android 开放 API**](http://www.wanandroid.com/blog/show/2)首页、项目等
