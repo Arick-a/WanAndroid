@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.OverScroller
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.withClip
@@ -35,20 +36,59 @@ data class Appointment(
  * 1.onDraw中的绘制 标头 左侧固定列 表格 每一项item
  * 2.双指缩放 通过ScaleGestureDetector计算缩放因子，然后计算col宽度/显示日数量，offsetX的偏移量
  * 3.横向滑动 GestureDetector捕获滚动事件 OverScroller和 onFling 实现惯性滚动 计算offsetX偏移量重新绘制左边界
- * 4.拖拽item 捕获按下位置-寻找对应item-移动绘制阴影/绘制placeholder-放下
+ * 4.拖拽item 捕获按下位置-寻找对应item/index-move事件获取移动下标-
+ * 移动绘制阴影/placeholder(移动时跳过绘制原来的item，相同placeholderIndex绘制占位再绘制正常的item)-
+ * up/cancel删除就的数据插入新的数据
+ *
+ * 🌟 增加功能:
+ * 1. 当位置移动时增加一个回调 (onAppointmentMovedListener)
+ * 2. 移动时增加一个拦截 (onBeforeAppointmentDropListener)
  */
 @RequiresApi(Build.VERSION_CODES.O)
 class AppointmentBoardView(
     context: Context, attrs: AttributeSet? = null
 ) : View(context, attrs), GestureDetector.OnGestureListener {
 
-    //预约集合
+    // 预约集合
     private val appointments = mutableListOf<Appointment>()
 
-    //整个内容区域（日期、网格和日程）相对于 View 可见区域向右移动的距离（即内容向左滚动的距离）
+    // 🌟 新增：原始位置信息，用于拖拽取消时恢复
+    private var originalDayOffset = -1
+    private var originalPeriod = -1
+
+    // 🌟 新增回调接口
+    /**
+     * 拖拽放下时，在数据实际变更前进行拦截。
+     * @param appointment 被拖动的日程
+     * @param newDayOffset 目标日期的偏移量
+     * @param newPeriod 目标时段 (0:上午, 1:下午)
+     * @param newIndex 目标时段内的插入索引
+     * @return true: 确认修改位置，进行数据变更。false: 取消修改，日程回到原位。
+     */
+    var onBeforeAppointmentDropListener: ((
+        appointment: Appointment,
+        newDayOffset: Int,
+        newPeriod: Int,
+        newIndex: Int
+    ) -> Boolean)? = null
+
+    /**
+     * 日程位置成功移动后触发的回调，用于业务同步服务器。
+     * 仅在 onBeforeAppointmentDropListener 返回 true 后调用。
+     * @param appointment 成功移动的日程
+     * @param oldDayOffset 移动前的日期偏移量
+     * @param oldPeriod 移动前的时段
+     */
+    var onAppointmentMovedListener: ((
+        appointment: Appointment,
+        oldDayOffset: Int,
+        oldPeriod: Int
+    ) -> Unit)? = null
+
+    // 整个内容区域（日期、网格和日程）相对于 View 可见区域向右移动的距离（即内容向左滚动的距离）
     private var offsetX = 0f
 
-    //表格默认宽度
+    // 表格默认宽度
     private var colWidth = 0f
 
     // 单个列默认宽度
@@ -59,21 +99,21 @@ class AppointmentBoardView(
     private var leftColumnWidth = 0f // 初始值在 init 中计算
     private var itemPadding = 0f // 新增：Item 之间的内边距
 
-    //最少最多日期 默认显示日期
+    // 最少最多日期 默认显示日期
     private val minDays = 2
     private val maxDays = 10
     private var daysShown = 3
     private val maxPerCell = 8
     private var daysShownFloat = daysShown.toFloat()
 
-    //是否正在缩放中
+    // 是否正在缩放中
     private var onScaling = false
 
-    //日期相关
+    // 日期相关
     private var today = LocalDate.now()
     private val dateFormatter = DateTimeFormatter.ofPattern("MM-dd")
 
-    //缩放、滑动、手势相关
+    // 缩放、滑动、手势相关
     private val scroller = OverScroller(context)
     private val scaleDetector = ScaleGestureDetector(context, ScaleListener())
     private val gestureDetector = GestureDetector(context, this)
@@ -201,6 +241,11 @@ class AppointmentBoardView(
         drawAppointments(canvas)
     }
 
+    /**
+     * 1. 绘制placeholder
+     * 2. 绘制正常的item
+     * 3. 绘制被拖动的item
+     */
     private fun drawAppointments(canvas: Canvas) {
         val leftStart = leftColumnWidth - offsetX
         val itemH = rowHeight / maxPerCell
@@ -210,11 +255,10 @@ class AppointmentBoardView(
         canvas.withClip(leftColumnWidth, headerHeight, width.toFloat(), height.toFloat()) {
 
             // 1. 遍历并绘制所有日程（包括占位符和排除被拖动的日程）
+            // 注意：groupBy 每次拖拽都会重建，但目前性能尚可，可接受
             appointments.groupBy { it.dayOffset to it.period }.forEach { (cell, allList) ->
                 val day = cell.first
                 val period = cell.second
-
-                // ... (其余代码保持不变，只修改了裁剪位置) ...
 
                 // 过滤：获取当前 Cell 中“非拖动中”的日程列表
                 val list = allList.filter { it != draggedAppointment }
@@ -225,7 +269,6 @@ class AppointmentBoardView(
                 val baseTop = headerHeight + period * rowHeight
 
                 // 优化：如果整个 Cell 不在可见区域，则跳过
-                // 注意：现在裁剪逻辑由 canvas.withClip 处理了，但保留这个检查可以微优化性能
                 if (baseLeft + colWidth < leftColumnWidth || baseLeft > width) return@forEach
 
                 // 占位符绘制逻辑：
@@ -233,11 +276,9 @@ class AppointmentBoardView(
                 var currentDrawIndex = 0
 
                 // 遍历所有非拖动中的日程
-                list.forEachIndexed { index, appointment ->
-
+                list.forEachIndexed { _, appointment ->
                     // 检查是否需要在当前索引前绘制占位符
                     if (isPlaceholderCell && currentDrawIndex == placeholderIndex) {
-                        // **注意：drawPlaceholder 和 drawSingleAppointment 的调用也需要修改，见下文**
                         drawPlaceholder(
                             canvas,
                             baseLeft,
@@ -282,9 +323,6 @@ class AppointmentBoardView(
         // 2. 绘制被拖动的日程（带阴影），使其浮动在最上层
         // 拖拽 Item 应该浮动在整个 View 上方，不应该被裁剪
         draggedAppointment?.let { appt ->
-            // ... (这部分代码保持不变，因为它处理的是浮动的拖拽 Item) ...
-            val itemHForDrag = rowHeight / maxPerCell
-
             // 🌟 优化3: 直接使用 dragCurrentX/Y 和 dragOffsetX/Y 计算 Item 左上角
             val left = dragCurrentX + dragOffsetX
             val top = dragCurrentY + dragOffsetY
@@ -488,16 +526,21 @@ class AppointmentBoardView(
                     // 2. 更新占位符位置
                     updatePlaceholder(event.x, event.y)
 
-                    invalidate()
+                    postInvalidateOnAnimation()
                     return true
                 }
 
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // 🌟 核心：处理拖拽放下/取消
                     handleDrop()
+                    // 重置拖拽状态
                     draggedAppointment = null
                     isDragging = false
                     placeholderCell = null
                     placeholderIndex = null
+                    originalDayOffset = -1
+                    originalPeriod = -1
+
                     // 清除惯性
                     if (!scroller.isFinished) {
                         scroller.abortAnimation()
@@ -541,6 +584,7 @@ class AppointmentBoardView(
             val focusX = detector.focusX
             // 滚动区域的相对X坐标
             val relFocusX = focusX - leftColumnWidth
+            // (offsetX + relFocusX) 是焦点的真正位置  (colWidth / oldColWidth) 缩放比例
             offsetX =
                 ((offsetX + relFocusX) * (colWidth / oldColWidth) - relFocusX)
 
@@ -596,6 +640,10 @@ class AppointmentBoardView(
 
         draggedAppointment?.let { appt ->
             isDragging = true
+            // 🌟 新增：记录原始位置
+            originalDayOffset = appt.dayOffset
+            originalPeriod = appt.period
+
             // 🌟 优化3: 记录 Item 左上角相对于手指点击点的偏移量
             dragOffsetX = result!!.second // Item Left - Click X
             dragOffsetY = result.third // Item Top - Click Y
@@ -637,6 +685,19 @@ class AppointmentBoardView(
     }
 
     /**
+     * 在onDraw之前，帧昏眩，每一帧取出计算结果 (scroller.currX) 并持续驱动重绘
+     */
+    override fun computeScroll() {
+        if (scroller.computeScrollOffset()) {
+            // 计算最大滚动偏移量
+            val maxX = reCalculateMaxX()
+            // 应用 scroller 计算出的新坐标，并约束
+            offsetX = scroller.currX.toFloat().coerceIn(0f, maxX)
+            postInvalidateOnAnimation()
+        }
+    }
+
+    /**
      * 根据当前手指位置 (x, y) 实时计算并更新占位符的位置 (placeholderCell, placeholderIndex)
      */
     private fun updatePlaceholder(x: Float, y: Float) {
@@ -671,76 +732,82 @@ class AppointmentBoardView(
     }
 
     /**
-     * 放置日程。根据占位符的位置更新数据列表。
+     * 放置日程。根据占位符的位置更新数据列表，并处理拦截回调。
      */
     private fun handleDrop() {
-        draggedAppointment?.let { appt ->
-            val targetCell = placeholderCell
-            val targetIndex = placeholderIndex
+        val appt = draggedAppointment ?: return
+        val targetCell = placeholderCell
+        val targetIndex = placeholderIndex
 
-            // 只有当有有效的放置位置时才进行数据修改
-            if (targetCell != null && targetIndex != null) {
-                val (newDay, newPeriod) = targetCell
-
-                // 1. 从appointments集合中删除被拖动的日程
-                appointments.remove(appt)
-
-                // 2. 准备目标 Cell 的日程列表（不含被拖动的日程）
-                // 优化：直接在 appointments 上操作，而不是先过滤再removeAll/addAll
-                val originalList = appointments.toMutableList()
-                appointments.clear()
-
-                var currentListIndex = 0
-                originalList.forEach { item ->
-                    if (item.dayOffset == newDay && item.period == newPeriod) {
-                        // 目标 Cell
-                        if (currentListIndex == targetIndex) {
-                            appointments.add(appt) // 插入被拖动的 Item
-                        }
-                        appointments.add(item) // 插入原有的 Item
-                        currentListIndex++
-                    } else {
-                        // 非目标 Cell
-                        appointments.add(item)
-                    }
-                }
-
-                // 处理目标索引在列表末尾的情况
-                if (currentListIndex == targetIndex) {
-                    appointments.add(appt)
-                }
-
-                // 3. 更新被拖动日程的 Cell 信息 (这个要在 insertion 之后做，否则会影响过滤)
-                // 实际上，只要在 drop 之后更新即可，因为下次绘制会用到
-                appt.dayOffset = newDay
-                appt.period = newPeriod
-
-            } else {
-                // 如果没有有效的放置位置，日程会回到原来的位置（数据结构中已经没有它了）
-                // 简单起见，可以将其重新添加到列表末尾，或者尝试寻找它原来的位置重新插入
-                // 由于我们是在 onLongPress 时才设置 isDragging = true，所以这里无需特殊处理，
-                // 只需要在下次绘制时，该 Item 就会在列表中消失，因为没有 updatePlaceholder/handleDrop
-                // 而是直接在 ACTION_UP 中被设置为 null。
-            }
+        // 目标位置无效、或者目标位置与原位置相同，则日程回到原位，不触发回调
+        if (targetCell == null || targetIndex == null ||
+            (targetCell.first == originalDayOffset && targetCell.second == originalPeriod)
+        ) {
+            // Log.d("Drop", "Invalid or Same location. Revert.")
+            // 此时 appt 已经在列表中，无需处理，因为 onLongPress 并没有删除它
+            // 只需要确保它的 dayOffset 和 period 保持不变即可（它们本来就没变）
+            return
         }
-    }
 
-    /**
-     * 在onDraw之前，帧昏眩，每一帧取出计算结果 (scroller.currX) 并持续驱动重绘
-     */
-    override fun computeScroll() {
-        if (scroller.computeScrollOffset()) {
-            // 计算最大滚动偏移量
-            val maxX = reCalculateMaxX()
-            // 应用 scroller 计算出的新坐标，并约束
-            offsetX = scroller.currX.toFloat().coerceIn(0f, maxX)
-            postInvalidateOnAnimation()
+        val (newDay, newPeriod) = targetCell
+        val oldDay = originalDayOffset
+        val oldPeriod = originalPeriod
+
+        // 🌟 拦截逻辑：在数据变更前调用回调
+        val proceed = onBeforeAppointmentDropListener?.invoke(
+            appt,
+            newDay,
+            newPeriod,
+            targetIndex
+        ) ?: true // 如果未设置拦截器，则默认为 true (继续)
+
+        if (proceed) {
+            // 确认修改：进行数据变更
+            // 1. 从appointments集合中删除被拖动的日程
+            appointments.remove(appt)
+
+            // 2. 插入到新的位置
+            val originalList = appointments.toMutableList()
+            appointments.clear()
+
+            var currentListIndex = 0
+            originalList.forEach { item ->
+                if (item.dayOffset == newDay && item.period == newPeriod) {
+                    // 目标 Cell
+                    if (currentListIndex == targetIndex) {
+                        appointments.add(appt) // 插入被拖动的 Item
+                    }
+                    appointments.add(item) // 插入原有的 Item
+                    currentListIndex++
+                } else {
+                    // 非目标 Cell
+                    appointments.add(item)
+                }
+            }
+
+            // 处理目标索引在列表末尾的情况
+            if (currentListIndex == targetIndex) {
+                appointments.add(appt)
+            }
+
+            // 3. 更新被拖动日程的 Cell 信息
+            appt.dayOffset = newDay
+            appt.period = newPeriod
+
+            // 🌟 触发移动成功回调
+            onAppointmentMovedListener?.invoke(appt, oldDay, oldPeriod)
+//            Toast.makeText(this.context, appt.name + "移动到" + newDay + newPeriod, Toast.LENGTH_SHORT).show()
+        } else {
+            // 取消修改：不做数据变更，日程回到原位
+            // 由于 onLongPress 时没有从列表中移除，所以只需忽略即可。
+            // 实际上，如果拖拽到不同的位置，但 onBeforeAppointmentDropListener 返回 false，
+            // 那么 appt 的 dayOffset 和 period 依然是原值，它会自然地被绘制回原位。
         }
     }
 
     /**
      * 找到给定坐标下的日程
-     * @return Pair<Appointment, Float, Float> - 日程对象, X偏移量(Item左上角-点击X), Y偏移量(Item左上角-点击Y)
+     * @return Triple<Appointment, Float, Float> - 日程对象, X偏移量(Item左上角-点击X), Y偏移量(Item左上角-点击Y)
      */
     private fun findAppointmentAt(x: Float, y: Float): Triple<Appointment, Float, Float>? {
         val leftStart = leftColumnWidth - offsetX
@@ -758,25 +825,15 @@ class AppointmentBoardView(
         cellAppointments.forEachIndexed { index, appointment ->
             val top = baseTop + index * itemH + itemPadding // Item 左上角 Y
             val left = leftColumnWidth - offsetX + dayIndex * colWidth + itemPadding // Item 左上角 X
-
-            // 🌟 优化2: 使用 tempRectF
-            tempRectF.set(
-                max(left, leftColumnWidth + itemPadding), // 考虑左侧边界
-                top,
-                left + colWidth - itemPadding,
-                top + itemDrawH
-            )
-
-            // 🌟 优化3: 调整 RectF 的计算，确保它代表整个可见区域的矩形，而非整个 Item 占据的区域
+            // 调整 RectF 的计算，确保它代表整个可见区域的矩形
             val hitRect = RectF(
-                max(left, leftColumnWidth + itemPadding),
+                max(left, leftColumnWidth + itemPadding), // 考虑左侧裁剪
                 top,
                 left + colWidth - itemPadding,
                 top + itemDrawH
             )
-
             if (hitRect.contains(x, y)) {
-                // 🌟 优化3: 计算 Item 左上角到点击点的偏移量
+                // 计算 Item 左上角到点击点的偏移量
                 val dx = hitRect.left - x
                 val dy = hitRect.top - y
                 return Triple(appointment, dx, dy)
