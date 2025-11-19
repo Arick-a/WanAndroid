@@ -32,7 +32,8 @@ class ProgressImageViewTarget<T>(
         ProgressInterceptor.removeListener(url)
     }
 
-    override fun onResourceReady(resource: T, transition: Transition<in T>?) {
+
+    override fun onResourceReady(resource: T & Any, transition: Transition<in T>?) {
         super.onResourceReady(resource, transition)
         ProgressInterceptor.removeListener(url)
     }
