@@ -160,7 +160,7 @@ class VideoPlayActivity : BaseMvvmActivity<VideoActivityPlayBinding, VideoPlayVi
     override fun onDestroy() {
         super.onDestroy()
         GSYVideoManager.releaseAllVideos()
-        if (orientationUtils != null) orientationUtils.releaseListener()
+        orientationUtils.releaseListener()
     }
 
     override fun onBackPressed() {

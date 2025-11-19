@@ -3,6 +3,8 @@ package com.example.module_main.ui
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -41,6 +43,22 @@ class MainActivity : BaseActivity() {
         initViewPager()
 
         initFlutterEvent()
+
+        adaptAndroid15()
+    }
+
+    private fun adaptAndroid15(){
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.cl_root)) { v, insets ->
+            val stateBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            v.setPadding(stateBars.left, stateBars.top, stateBars.right, stateBars.bottom)
+            insets
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.cl_root)) { v, insets ->
+            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(navigationBars.left, navigationBars.top, navigationBars.right, navigationBars.bottom)
+            insets
+        }
     }
 
     private fun initFlutterEvent() {
