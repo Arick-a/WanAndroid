@@ -29,6 +29,9 @@
         <activity
                 android:name=".activity.RegisterActivity"
                 android:exported="false" />
+        <activity
+            android:name=".activity.StaggeredGridLayoutActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
