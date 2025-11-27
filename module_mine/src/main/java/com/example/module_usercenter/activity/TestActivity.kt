@@ -102,6 +102,9 @@ class TestActivity : BaseActivity() {
         findViewById<Button>(R.id.btn_5).setOnClickListener {
             startActivity(Intent(this, ThreeStageSheetActivity::class.java))
         }
+        findViewById<Button>(R.id.btn_6).setOnClickListener {
+            startActivity(Intent(this, StaggeredGridLayoutActivity::class.java))
+        }
     }
 
     private fun haha(l: Long): Double {

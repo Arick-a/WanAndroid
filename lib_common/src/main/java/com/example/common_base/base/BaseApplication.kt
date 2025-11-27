@@ -7,6 +7,8 @@ package com.example.common_base.base
 //import io.flutter.embedding.android.FlutterActivityLaunchConfigs
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.os.Looper
 import com.alibaba.android.arouter.launcher.ARouter
 import com.example.common_base.BuildConfig
 import com.example.common_base.R
@@ -45,6 +47,7 @@ open class BaseApplication : Application() {
 
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
+
         TimeMonitorManager.resetTimeMonitor(TIME_MONITOR_APP_ONCREATE)
     }
 
