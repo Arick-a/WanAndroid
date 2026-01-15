@@ -12,7 +12,7 @@ ext {
     compiler = [
             "arouter-compiler"       : "com.alibaba:arouter-compiler:1.5.2",
             "glide-compiler"         : "com.github.bumptech.glide:compiler:4.12.0",
-            "room-compiler"          : "androidx.room:room-compiler:2.3.0",
+            "room-compiler"          : "androidx.room:room-compiler:2.6.1",
     ]
 
     dependencies = [
@@ -35,8 +35,8 @@ ext {
             "rxjava"                 : "io.reactivex.rxjava2:rxjava:2.2.2",
             "okhttp"                 : "com.squareup.okhttp3:okhttp:4.9.3",
             "logging-interceptor"    : "com.squareup.okhttp3:logging-interceptor:4.9.3",
-            "room-runtime"           : "androidx.room:room-runtime:2.3.0",
-            "room-ktx"               : "androidx.room:room-ktx:2.3.0",
+            "room-runtime"           : "androidx.room:room-runtime:2.6.1",
+            "room-ktx"               : "androidx.room:room-ktx:2.6.1",
             "kotlinx-coroutines"     : "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3",
             "lifecycle-runtime"      : "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1",
             "lifecycle-livedata"     : "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1",
