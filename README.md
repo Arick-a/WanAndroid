@@ -1,7 +1,8 @@
 
+
 ## 简介
 WanAndroid是一个融合了各种技术的App,主要是为了将平时学习的技术实践到项目中。
-总体上包含了组件化、flutter(混合开发)、kotlin、mvvm、jetpack、协程等技术。
+总体上包含了组件化、flutter(混合开发)、kotlin、mvvm、mvp、jetpack、协程等技术。
 平时在闲暇之余，可以刷刷文章也可以看看视频。
 
 ## 效果一览
